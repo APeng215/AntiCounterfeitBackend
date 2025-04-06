@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,14 +16,19 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access= AccessLevel.PUBLIC, force=true)
 public class Product {
-    @ManyToOne
-    private Goods goods;
+
     @Id
     @GeneratedValue
     private Long ID;
+
+    @ManyToOne
+    private Goods goods;
+
     private Date produceDate;
+
     @Column(unique = true, length = 13)
     private String antiCounterfeitingCode;
+
     @ManyToMany
     private List<AntiCounterfeitingColor> antiCounterfeitingColors = new ArrayList<>();
 
