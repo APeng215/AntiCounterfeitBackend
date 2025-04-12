@@ -31,7 +31,7 @@ public class GoodsController {
 
     @PutMapping
     public Goods set(@RequestBody Goods goods) {
-        return goodsService.set(goods);
+        return goodsService.update(goods);
     }
 
 }

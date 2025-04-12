@@ -34,7 +34,7 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public Goods set(Goods goods) {
+    public Goods update(Goods goods) {
         return repository.save(goods);
     }
 }

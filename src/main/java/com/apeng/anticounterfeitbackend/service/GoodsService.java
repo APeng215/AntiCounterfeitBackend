@@ -9,5 +9,5 @@ public interface GoodsService {
     void deleteById(String goodsName);
     List<Goods> getAll();
     Goods get(String goodsName);
-    Goods set(Goods goods);
+    Goods update(Goods goods);
 }

@@ -4,8 +4,11 @@ import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -34,7 +37,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product set(Product product) {
+    public Product update(Long id, Product product) {
+        if (!repository.existsById(id)) {
+            throw new NoSuchElementException();
+        }
+        product.setID(id);
         return repository.save(product);
+    }
+
+    @Transactional
+    @Override
+    public Product bindColors(Long id, List<Color> colors) {
+        repository.findById(id).ifPresentOrElse(
+                product -> {
+                        product.setAntiCounterfeitingColors(colors);
+                        repository.save(product);
+                    },
+                () -> {throw new NoSuchElementException(String.format("Cannot find product(id: %d)! You could create one first.", id));}
+        );
+        return repository.findById(id).get();
     }
 }

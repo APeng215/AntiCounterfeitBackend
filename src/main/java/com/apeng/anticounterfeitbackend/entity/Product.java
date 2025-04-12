@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +29,8 @@ public class Product {
     @Column(unique = true, length = 13)
     private String antiCounterfeitingCode;
 
-    @ManyToMany
-    private List<AntiCounterfeitingColor> antiCounterfeitingColors = new ArrayList<>();
+    @ElementCollection
+    @OrderColumn
+    private List<Color> antiCounterfeitingColors = new ArrayList<>();
 
 }
