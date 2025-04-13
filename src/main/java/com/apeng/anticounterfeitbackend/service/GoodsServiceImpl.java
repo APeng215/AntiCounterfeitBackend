@@ -3,7 +3,9 @@ package com.apeng.anticounterfeitbackend.service;
 import com.apeng.anticounterfeitbackend.entity.Goods;
 import com.apeng.anticounterfeitbackend.repository.GoodsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -15,6 +17,12 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     public Goods add(Goods goods) {
+        if (repository.existsById(goods.getName())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Goods with name '" + goods.getName() + "' already exists"
+            );
+        }
         return repository.save(goods);
     }
 
