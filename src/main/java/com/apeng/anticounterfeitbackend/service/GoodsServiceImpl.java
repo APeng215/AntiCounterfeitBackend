@@ -43,6 +43,12 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     public Goods update(Goods goods) {
+        if (goods.getName() == null || !repository.existsById(goods.getName())) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Goods with ID " + goods.getName() + " not found"
+            );
+        }
         return repository.save(goods);
     }
 }
