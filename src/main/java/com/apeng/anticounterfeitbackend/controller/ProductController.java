@@ -1,5 +1,6 @@
 package com.apeng.anticounterfeitbackend.controller;
 
+import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,8 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public Product add(@RequestBody Product Product) {
-        return productService.add(Product);
+    public Product add(@RequestBody ProductRequest productRequest) {
+        return productService.add(productRequest);
     }
 
     @DeleteMapping("/{id}")

@@ -1,7 +1,11 @@
 package com.apeng.anticounterfeitbackend.service;
 
+import com.apeng.anticounterfeitbackend.dto.ProductRequest;
+import com.apeng.anticounterfeitbackend.entity.Goods;
 import com.apeng.anticounterfeitbackend.entity.Product;
+import com.apeng.anticounterfeitbackend.repository.GoodsRepository;
 import com.apeng.anticounterfeitbackend.repository.ProductRepository;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,52 +13,68 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.*;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    @Autowired
-    private ProductRepository repository;
+    public static String privateKey = "c8f01010-9165-41d4-a217-82d500e9cd62"; // Random UUID
 
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private GoodsRepository goodsRepository;
+
+    @Autowired
+    private AcColorService acColorService;
+
+    @Transactional
     @Override
-    public Product add(Product product) {
-        return repository.save(product);
+    public Product add(ProductRequest productRequest) {
+        Goods goods2Bind = goodsRepository.findById(productRequest.getGoodsName()).orElseThrow();
+        Product product = generateProduct(productRequest, goods2Bind);
+        return productRepository.save(product);
+    }
+
+    private Product generateProduct(ProductRequest productRequest, Goods goods2Bind) {
+        Product product = new Product(goods2Bind, productRequest.getProduceDate());
+        product.initUUID();
+        product.setSignature(DigestUtils.sha256Hex(product.getUuid().toString() + privateKey));
+        product.setAntiCounterfeitingColors(acColorService.randomPick(5));
+        return product;
     }
 
     @Override
     public void deleteById(Long id) {
-        repository.deleteById(id);
+        productRepository.deleteById(id);
     }
 
     @Override
     public List<Product> getAll() {
-        return repository.findAll();
+        return productRepository.findAll();
     }
 
     @Override
     public Product getById(Long id) {
-        return repository.findById(id).orElseThrow();
+        return productRepository.findById(id).orElseThrow();
     }
 
     @Override
     public Product update(Long id, Product product) {
-        if (!repository.existsById(id)) {
-            throw new NoSuchElementException();
-        }
-        product.setID(id);
-        return repository.save(product);
+        throw new UnsupportedOperationException("Update for product is unsupported!");
     }
 
     @Transactional
     @Override
     public Product bindColors(Long id, List<Color> colors) {
-        repository.findById(id).ifPresentOrElse(
+        productRepository.findById(id).ifPresentOrElse(
                 product -> {
                         product.setAntiCounterfeitingColors(colors);
-                        repository.save(product);
+                        productRepository.save(product);
                     },
                 () -> {throw new NoSuchElementException(String.format("Cannot find product(id: %d)! You could create one first.", id));}
         );
-        return repository.findById(id).get();
+        return productRepository.findById(id).get();
     }
 }

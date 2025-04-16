@@ -10,6 +10,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -21,16 +22,29 @@ public class Product {
     @GeneratedValue
     private Long ID;
 
+    private UUID uuid;
+
     @ManyToOne
     private Goods goods;
 
     private Date produceDate;
 
-    @Column(unique = true, length = 13)
-    private String antiCounterfeitingCode;
+    private String signature;
 
     @ElementCollection
     @OrderColumn
     private List<Color> antiCounterfeitingColors = new ArrayList<>();
+
+    public Product(Goods goods, Date produceDate) {
+        this.goods = goods;
+        this.produceDate = produceDate;
+    }
+
+    public void initUUID() {
+        if (uuid != null) {
+            throw new IllegalStateException("The product already has a UUID!");
+        }
+        this.uuid = UUID.randomUUID();
+    }
 
 }

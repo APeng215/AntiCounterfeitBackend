@@ -1,13 +1,15 @@
 package com.apeng.anticounterfeitbackend.service;
 
 
+import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.entity.Product;
 
 import java.awt.*;
 import java.util.List;
+import java.util.UUID;
 
 public interface ProductService {
-    Product add(Product product);
+    Product add(ProductRequest productRequest);
     void deleteById(Long id);
     List<Product> getAll();
     Product getById(Long id);
