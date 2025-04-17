@@ -7,8 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ public class Product {
     @ManyToOne
     private Goods goods;
 
-    private Date produceDate;
+    private LocalDate produceDate;
 
     private String signature;
 
@@ -35,7 +35,7 @@ public class Product {
     @OrderColumn
     private List<Color> antiCounterfeitingColors = new ArrayList<>();
 
-    public Product(Goods goods, Date produceDate) {
+    public Product(Goods goods, LocalDate produceDate) {
         this.goods = goods;
         this.produceDate = produceDate;
     }
