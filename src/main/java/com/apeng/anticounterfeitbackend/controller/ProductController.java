@@ -18,7 +18,14 @@ public class ProductController {
 
     @PostMapping
     public Product add(@RequestBody ProductRequest productRequest) {
+        validateEmpty(productRequest);
         return productService.add(productRequest);
+    }
+
+    private static void validateEmpty(ProductRequest productRequest) {
+        if (productRequest.hasNullField()) {
+            throw new IllegalArgumentException("Product request has empty field!");
+        }
     }
 
     @DeleteMapping("/{id}")
