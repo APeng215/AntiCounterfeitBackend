@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -31,13 +31,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public Product add(ProductRequest productRequest) {
+    public List<Product> add(ProductRequest productRequest) {
         Goods goods2Bind = goodsRepository.findById(productRequest.getGoodsName()).orElseThrow();
-        Product product = generateProduct(productRequest, goods2Bind);
-        return productRepository.save(product);
+        List<Product> products = generateProducts(productRequest, goods2Bind);
+        return productRepository.saveAll(products);
     }
 
-    private Product generateProduct(ProductRequest productRequest, Goods goods2Bind) {
+    private List<Product> generateProducts(ProductRequest productRequest, Goods goods2Bind) {
+        List<Product> result = new ArrayList<>();
+        for (int i = 0; i < productRequest.getProduceNum(); i++) {
+            Product product = generateSingleProduct(productRequest, goods2Bind);
+            result.add(product);
+        }
+        return result;
+    }
+
+    private Product generateSingleProduct(ProductRequest productRequest, Goods goods2Bind) {
         Product product = new Product(goods2Bind, productRequest.getProduceDate());
         product.initUUID();
         product.setSignature(DigestUtils.sha256Hex(product.getUuid().toString() + privateKey));

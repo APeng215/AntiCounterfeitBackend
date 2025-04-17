@@ -17,7 +17,7 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public Product add(@RequestBody ProductRequest productRequest) {
+    public List<Product> add(@RequestBody ProductRequest productRequest) {
         validateEmpty(productRequest);
         return productService.add(productRequest);
     }
