@@ -13,7 +13,7 @@ public class Initializer {
     @Bean
     public CommandLineRunner addAdminUser(AcColorService acColorService) {
         return (arg) -> {
-            acColorService.add(Color.BLUE, Color.CYAN, Color.GREEN, Color.RED);
+            acColorService.add(Color.BLUE, Color.CYAN, Color.GREEN, Color.RED, Color.MAGENTA, Color.YELLOW);
         };
     }
 

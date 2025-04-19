@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product(goods2Bind, productRequest.getProduceDate());
         product.initUUID();
         product.setSignature(DigestUtils.sha256Hex(product.getUuid().toString() + privateKey));
-        product.setAntiCounterfeitingColors(acColorService.randomPick(5));
+        product.setAntiCounterfeitingColors(acColorService.randomPick(6));
         return product;
     }
 

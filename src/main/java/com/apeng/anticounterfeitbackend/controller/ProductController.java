@@ -1,6 +1,7 @@
 package com.apeng.anticounterfeitbackend.controller;
 
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
+import com.apeng.anticounterfeitbackend.dto.ProductResponse;
 import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAll() {
-        return productService.getAll();
+    public List<ProductResponse> getAll() {
+        return productService.getAll().stream().map(ProductResponse::new).toList();
     }
 
     @PutMapping("/{id}")
