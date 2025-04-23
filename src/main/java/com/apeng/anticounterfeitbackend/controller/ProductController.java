@@ -2,6 +2,7 @@ package com.apeng.anticounterfeitbackend.controller;
 
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.dto.ProductResponse;
+import com.apeng.anticounterfeitbackend.dto.ValidationRequest;
 import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.awt.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/products")
@@ -48,6 +50,11 @@ public class ProductController {
     public Product bindColors(@PathVariable Long id, @RequestBody List<String> colorsInHex) {
         List<Color> colors = convert2ColorObjects(colorsInHex);
         return productService.bindColors(id, colors);
+    }
+
+    @PostMapping("/validate")
+    public Product validate(@RequestBody ValidationRequest validationRequest) {
+        return productService.validate(validationRequest.getUuid(), validationRequest.getSignature());
     }
 
     private static List<Color> convert2ColorObjects(List<String> colorsInHex) {

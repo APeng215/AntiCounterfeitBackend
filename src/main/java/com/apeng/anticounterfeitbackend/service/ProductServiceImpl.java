@@ -7,13 +7,16 @@ import com.apeng.anticounterfeitbackend.repository.GoodsRepository;
 import com.apeng.anticounterfeitbackend.repository.ProductRepository;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -49,9 +52,13 @@ public class ProductServiceImpl implements ProductService {
     private Product generateSingleProduct(ProductRequest productRequest, Goods goods2Bind) {
         Product product = new Product(goods2Bind, productRequest.getProduceDate());
         product.initUUID();
-        product.setSignature(DigestUtils.sha256Hex(product.getUuid().toString() + privateKey));
+        product.setSignature(generateSignature(product.getUuid()));
         product.setAntiCounterfeitingColors(acColorService.randomPick(6));
         return product;
+    }
+
+    private static String generateSignature(UUID uuid) {
+        return DigestUtils.sha256Hex(uuid.toString() + privateKey);
     }
 
     @Override
@@ -85,5 +92,27 @@ public class ProductServiceImpl implements ProductService {
                 () -> {throw new NoSuchElementException(String.format("Cannot find product(id: %d)! You could create one first.", id));}
         );
         return productRepository.findById(id).get();
+    }
+
+    @Override
+    public Product validate(UUID uuid, String signature) {
+        validateSignature(uuid, signature);
+        Product product = productRepository.findFirstByUuid(uuid);
+        if (product != null) {
+            return product;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private static void validateSignature(UUID uuid, String signature) {
+        if (!isSignatureCorrect(uuid, signature)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid signature");
+        }
+    }
+
+    private static boolean isSignatureCorrect(UUID uuid, String signature) {
+        String correctSignature = generateSignature(uuid);
+        return correctSignature.equals(signature);
     }
 }

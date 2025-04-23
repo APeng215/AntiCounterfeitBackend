@@ -6,6 +6,7 @@ import com.apeng.anticounterfeitbackend.entity.Product;
 
 import java.awt.*;
 import java.util.List;
+import java.util.UUID;
 
 public interface ProductService {
     List<Product> add(ProductRequest productRequest);
@@ -14,4 +15,5 @@ public interface ProductService {
     Product getById(Long id);
     Product update(Long id, Product product);
     Product bindColors(Long id, List<Color> colors);
+    Product validate(UUID uuid, String signature);
 }
