@@ -12,6 +12,7 @@ public interface ProductService {
     List<Product> add(ProductRequest productRequest);
     void deleteById(Long id);
     List<Product> getAll();
+    Product get(Long id);
     Product getById(Long id);
     Product update(Long id, Product product);
     Product bindColors(Long id, List<Color> colors);
