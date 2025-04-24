@@ -52,8 +52,8 @@ public class ProductController {
     }
 
     @PostMapping("/validate")
-    public Product validate(@RequestBody ValidationRequest validationRequest) {
-        return productService.validate(validationRequest.getUuid(), validationRequest.getSignature());
+    public ProductResponse validate(@RequestBody ValidationRequest validationRequest) {
+        return new ProductResponse(productService.validate(validationRequest.getUuid(), validationRequest.getSignature()));
     }
 
     private static List<Color> convert2ColorObjects(List<String> colorsInHex) {
