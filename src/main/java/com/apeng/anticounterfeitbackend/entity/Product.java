@@ -35,6 +35,14 @@ public class Product {
     @OrderColumn
     private List<Color> antiCounterfeitingColors = new ArrayList<>();
 
+    private Long validationCount = 0L;
+
+    private Boolean isCounterfeit = false;
+
+    public void increaseValidationCount() {
+        validationCount++;
+    }
+
     public Product(Goods goods, LocalDate produceDate) {
         this.goods = goods;
         this.produceDate = produceDate;

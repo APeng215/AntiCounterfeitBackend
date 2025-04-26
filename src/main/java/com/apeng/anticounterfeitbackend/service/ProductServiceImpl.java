@@ -102,11 +102,27 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product validate(UUID uuid, String signature) {
         validateSignature(uuid, signature);
-        Product product = productRepository.findFirstByUuid(uuid);
+        Product product = findProductByUuid(uuid);
         if (product != null) {
-            return product;
+            updateProductStates(product);
+            return productRepository.save(product);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private static void updateProductStates(Product product) {
+        product.increaseValidationCount();
+        updateCounterfeitField(product);
+    }
+
+    private Product findProductByUuid(UUID uuid) {
+        return productRepository.findFirstByUuid(uuid);
+    }
+
+    private static void updateCounterfeitField(Product product) {
+        if (product.getValidationCount() > 5) {
+            product.setIsCounterfeit(true);
         }
     }
 

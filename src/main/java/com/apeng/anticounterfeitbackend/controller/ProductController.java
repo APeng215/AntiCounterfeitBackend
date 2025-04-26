@@ -5,12 +5,16 @@ import com.apeng.anticounterfeitbackend.dto.ProductResponse;
 import com.apeng.anticounterfeitbackend.dto.ValidationRequest;
 import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.*;
 import java.util.List;
+import java.util.logging.Logger;
 
+@Slf4j
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -52,7 +56,9 @@ public class ProductController {
     }
 
     @PostMapping("/validate")
-    public ProductResponse validate(@RequestBody ValidationRequest validationRequest) {
+    public ProductResponse validate(@RequestBody ValidationRequest validationRequest, HttpServletRequest request) {
+        String clientIp = extractClientIp(request);
+        System.out.println("IP is " + clientIp);
         return new ProductResponse(productService.validate(validationRequest.getUuid(), validationRequest.getSignature()));
     }
 
@@ -76,6 +82,17 @@ public class ProductController {
 
         // Combine into packed integer (0xRRGGBB)
         return (r << 16) | (g << 8) | b;
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        // Standard header used by proxies/load balancers
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isEmpty()) {
+            // X-Forwarded-For can be a comma-list: client, proxy1, proxy2…
+            return xff.split(",")[0].trim();
+        }
+        // Fallback to the direct remote address
+        return request.getRemoteAddr();
     }
 
 }
