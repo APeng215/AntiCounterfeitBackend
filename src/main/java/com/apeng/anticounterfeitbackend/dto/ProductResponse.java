@@ -2,6 +2,7 @@ package com.apeng.anticounterfeitbackend.dto;
 
 import com.apeng.anticounterfeitbackend.entity.Goods;
 import com.apeng.anticounterfeitbackend.entity.Product;
+import com.apeng.anticounterfeitbackend.entity.QueryInfo;
 import com.apeng.anticounterfeitbackend.util.ColorUtils;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class ProductResponse {
     private List<String> acColorsInHex;
     private Long queryCount;
     private Boolean isCounterfeit;
+    private List<QueryInfo> queries;
 
     public ProductResponse(Product product) {
         this.ID = product.getID();
@@ -30,6 +32,7 @@ public class ProductResponse {
         this.signature = product.getSignature();
         this.queryCount = product.getValidationCount();
         this.isCounterfeit = product.getIsCounterfeit();
+        this.queries = product.getQueries();
         acColorsInHex = new ArrayList<>(product.getAntiCounterfeitingColors().stream().map(ColorUtils::toHex).toList());
     }
 

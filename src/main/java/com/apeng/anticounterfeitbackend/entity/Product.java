@@ -39,6 +39,10 @@ public class Product {
 
     private Boolean isCounterfeit = false;
 
+    @ElementCollection
+    @OrderColumn
+    private List<QueryInfo> queries = new ArrayList<>();
+
     public void increaseValidationCount() {
         validationCount++;
     }
