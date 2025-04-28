@@ -7,12 +7,16 @@ import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Slf4j
 @RestController
@@ -58,7 +62,7 @@ public class ProductController {
     @PostMapping("/validate")
     public ProductResponse validate(@RequestBody ValidationRequest validationRequest, HttpServletRequest request) {
         String clientIp = extractClientIp(request);
-        System.out.println("IP is " + clientIp);
+        System.out.println(queryIpAddress(clientIp));
         return new ProductResponse(productService.validate(validationRequest.getUuid(), validationRequest.getSignature()));
     }
 
@@ -93,6 +97,39 @@ public class ProductController {
         }
         // Fallback to the direct remote address
         return request.getRemoteAddr();
+    }
+
+    private String queryIpAddress(String ip) {
+//        String host = "https://lxipaddr.market.alicloudapi.com";
+//        String path = "/iplocaltion/getName";
+//        String method = "GET";
+//        String appcode = "bb92ecf8b1a942d99ecfab8a2148025f";
+//        Map<String, String> headers = new HashMap<String, String>();
+//        //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
+//        headers.put("Authorization", "APPCODE " + appcode);
+//        Map<String, String> querys = new HashMap<String, String>();
+//        querys.put("ip", ip);
+
+        OkHttpClient client = new OkHttpClient();
+
+        HttpUrl url = HttpUrl.parse("https://lxipaddr.market.alicloudapi.com/iplocaltion/getName")
+                .newBuilder()
+                .addQueryParameter("ip", ip)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("Authorization", "APPCODE bb92ecf8b1a942d99ecfab8a2148025f")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful())
+                throw new IOException("Unexpected code " + response);
+            return response.body().string();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
