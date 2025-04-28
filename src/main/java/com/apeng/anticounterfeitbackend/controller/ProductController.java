@@ -1,9 +1,13 @@
 package com.apeng.anticounterfeitbackend.controller;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.dto.ProductResponse;
 import com.apeng.anticounterfeitbackend.dto.ValidationRequest;
+import com.apeng.anticounterfeitbackend.entity.Location;
 import com.apeng.anticounterfeitbackend.entity.Product;
+import com.apeng.anticounterfeitbackend.entity.QueryInfo;
 import com.apeng.anticounterfeitbackend.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -11,17 +15,23 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.*;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+
+    private final static String APP_CODE = "bb92ecf8b1a942d99ecfab8a2148025f";
 
     @Autowired
     private ProductService productService;
@@ -61,9 +71,9 @@ public class ProductController {
 
     @PostMapping("/validate")
     public ProductResponse validate(@RequestBody ValidationRequest validationRequest, HttpServletRequest request) {
-        String clientIp = extractClientIp(request);
-        System.out.println(queryIpAddress(clientIp));
-        return new ProductResponse(productService.validate(validationRequest.getUuid(), validationRequest.getSignature()));
+        QueryInfo queryInfo = queryIpAddress(extractClientIp(request));
+        System.out.println(queryInfo);
+        return new ProductResponse(productService.validate(validationRequest.getUuid(), validationRequest.getSignature(), queryInfo));
     }
 
     private static List<Color> convert2ColorObjects(List<String> colorsInHex) {
@@ -99,7 +109,7 @@ public class ProductController {
         return request.getRemoteAddr();
     }
 
-    private String queryIpAddress(String ip) {
+    private QueryInfo queryIpAddress(String ip) {
 //        String host = "https://lxipaddr.market.alicloudapi.com";
 //        String path = "/iplocaltion/getName";
 //        String method = "GET";
@@ -120,16 +130,31 @@ public class ProductController {
         Request request = new Request.Builder()
                 .url(url)
                 .get()
-                .addHeader("Authorization", "APPCODE bb92ecf8b1a942d99ecfab8a2148025f")
+                .addHeader("Authorization", "APPCODE " + APP_CODE)
                 .build();
 
+        return requestAndParse(client, request);
+    }
+
+    @NotNull
+    private static QueryInfo requestAndParse(OkHttpClient client, Request request) {
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful())
+            if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
-            return response.body().string();
+            } else {
+                JSONObject responseJsonObject = JSON.parseObject(response.body().bytes());
+                QueryInfo queryInfo = new QueryInfo();
+                populateQueryInfo(queryInfo, responseJsonObject);
+                return queryInfo;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void populateQueryInfo(QueryInfo queryInfo, JSONObject responseJsonObject) {
+        queryInfo.setQueryTime(Timestamp.from(Instant.now()));
+        queryInfo.setLocation(Location.ofJsonObject(responseJsonObject));
     }
 
 }

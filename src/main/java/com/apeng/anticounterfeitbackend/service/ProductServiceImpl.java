@@ -3,6 +3,7 @@ package com.apeng.anticounterfeitbackend.service;
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.entity.Goods;
 import com.apeng.anticounterfeitbackend.entity.Product;
+import com.apeng.anticounterfeitbackend.entity.QueryInfo;
 import com.apeng.anticounterfeitbackend.repository.GoodsRepository;
 import com.apeng.anticounterfeitbackend.repository.ProductRepository;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -100,20 +101,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product validate(UUID uuid, String signature) {
+    public Product validate(UUID uuid, String signature, QueryInfo queryInfo) {
         validateSignature(uuid, signature);
         Product product = findProductByUuid(uuid);
         if (product != null) {
-            updateProductStates(product);
+            updateProductStates(product, queryInfo);
             return productRepository.save(product);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
-    private static void updateProductStates(Product product) {
+    private static void updateProductStates(Product product, QueryInfo queryInfo) {
+        addQueryInfo2Product(product, queryInfo);
         product.increaseValidationCount();
         updateCounterfeitField(product);
+    }
+
+    private static void addQueryInfo2Product(Product product, QueryInfo queryInfo) {
+        product.getQueries().add(queryInfo);
     }
 
     private Product findProductByUuid(UUID uuid) {
