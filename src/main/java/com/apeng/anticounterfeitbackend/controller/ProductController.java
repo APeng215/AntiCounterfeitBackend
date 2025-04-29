@@ -23,7 +23,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -133,18 +132,18 @@ public class ProductController {
                 .addHeader("Authorization", "APPCODE " + APP_CODE)
                 .build();
 
-        return requestAndParse(client, request);
+        return requestAndParse(client, request, ip);
     }
 
     @NotNull
-    private static QueryInfo requestAndParse(OkHttpClient client, Request request) {
+    private static QueryInfo requestAndParse(OkHttpClient client, Request request, String ip) {
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             } else {
                 JSONObject responseJsonObject = JSON.parseObject(response.body().bytes());
                 QueryInfo queryInfo = new QueryInfo();
-                populateQueryInfo(queryInfo, responseJsonObject);
+                populateQueryInfo(queryInfo, responseJsonObject, ip);
                 return queryInfo;
             }
         } catch (IOException e) {
@@ -152,9 +151,10 @@ public class ProductController {
         }
     }
 
-    private static void populateQueryInfo(QueryInfo queryInfo, JSONObject responseJsonObject) {
+    private static void populateQueryInfo(QueryInfo queryInfo, JSONObject responseJsonObject, String ip) {
         queryInfo.setQueryTime(Timestamp.from(Instant.now()));
         queryInfo.setLocation(Location.ofJsonObject(responseJsonObject));
+        queryInfo.setIp(ip);
     }
 
 }
