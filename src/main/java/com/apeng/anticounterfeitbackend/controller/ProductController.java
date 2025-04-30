@@ -141,7 +141,9 @@ public class ProductController {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             } else {
-                JSONObject responseJsonObject = JSON.parseObject(response.body().bytes());
+                String bodyStr = response.body().string();
+                System.out.println("Address query body string: " + bodyStr);
+                JSONObject responseJsonObject = JSON.parseObject(bodyStr);
                 QueryInfo queryInfo = new QueryInfo();
                 populateQueryInfo(queryInfo, responseJsonObject, ip);
                 return queryInfo;
