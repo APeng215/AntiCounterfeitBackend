@@ -137,12 +137,13 @@ public class ProductController {
 
     @NotNull
     private static QueryInfo requestAndParse(OkHttpClient client, Request request, String ip) {
+        System.out.println("Address query request: " + request.toString());
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             } else {
                 String bodyStr = response.body().string();
-                System.out.println("Address query body string: " + bodyStr);
+                System.out.println("Address query response body string: " + bodyStr);
                 JSONObject responseJsonObject = JSON.parseObject(bodyStr);
                 QueryInfo queryInfo = new QueryInfo();
                 populateQueryInfo(queryInfo, responseJsonObject, ip);
