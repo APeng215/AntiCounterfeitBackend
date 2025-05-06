@@ -18,4 +18,5 @@ public interface ProductService {
     Product update(Long id, Product product);
     Product bindColors(Long id, List<Color> colors);
     Product validate(UUID uuid, String signature, QueryInfo queryInfo);
+    void deleteAll(List<Long> ids);
 }

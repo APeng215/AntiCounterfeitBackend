@@ -52,6 +52,11 @@ public class ProductController {
         productService.deleteById(id);
     }
 
+    @DeleteMapping()
+    public void deleteAll(@RequestBody List<Long> ids) {
+        productService.deleteAll(ids);
+    }
+
     @GetMapping
     public List<ProductResponse> getAll() {
         return productService.getAll().stream().map(ProductResponse::new).toList();

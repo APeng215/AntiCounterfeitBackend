@@ -112,6 +112,12 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Transactional
+    @Override
+    public void deleteAll(List<Long> ids) {
+        ids.forEach(this::deleteById);
+    }
+
     private static void updateProductStates(Product product, QueryInfo queryInfo) {
         addQueryInfo2Product(product, queryInfo);
         product.increaseValidationCount();
