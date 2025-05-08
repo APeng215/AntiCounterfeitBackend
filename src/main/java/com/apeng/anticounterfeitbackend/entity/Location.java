@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Location {
 
-    private String nation, province, city, district;
-    private Double lat;
-    private Double lng;
+    private String nation = "中国", province = "河南", city = "郑州市", district;
+    private Double lat = 34.7599;
+    private Double lng = 113.6459;
 
     /**
      * Populate the instance with response object from API
