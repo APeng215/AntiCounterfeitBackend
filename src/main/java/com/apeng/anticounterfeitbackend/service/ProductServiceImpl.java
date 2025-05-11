@@ -1,5 +1,6 @@
 package com.apeng.anticounterfeitbackend.service;
 
+import com.apeng.anticounterfeitbackend.dto.ProductionStats;
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.entity.Goods;
 import com.apeng.anticounterfeitbackend.entity.Product;
@@ -14,10 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.*;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -116,6 +118,32 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteAll(List<Long> ids) {
         ids.forEach(this::deleteById);
+    }
+
+    @Override
+    public ProductionStats stats() {
+        // 1. Count by YearMonth
+        Map<YearMonth, Long> countsByYearMonth = productRepository.findAll().stream()
+                .map(Product::getProduceDate)        // LocalDate
+                .map(YearMonth::from)                // YearMonth.of(year, month)
+                .collect(Collectors.groupingBy(
+                        ym -> ym,
+                        Collectors.counting()
+                ));
+
+        // 2. Re-group by year into a 12-element list
+        Map<Long, List<Long>> annualProductions = new TreeMap<>();
+        countsByYearMonth.forEach((ym, count) -> {
+            long year = ym.getYear();
+            annualProductions
+                    .computeIfAbsent(year, y -> {
+                        // initialize a 12-slot list of zeros
+                        List<Long> months = new ArrayList<>(Collections.nCopies(12, 0L));
+                        return months;
+                    })
+                    .set(ym.getMonthValue() - 1, count); // monthValue 1…12 → index 0…11
+        });
+        return new ProductionStats(annualProductions);
     }
 
     private static void updateProductStates(Product product, QueryInfo queryInfo) {

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.dto.ProductResponse;
+import com.apeng.anticounterfeitbackend.dto.ProductionStats;
 import com.apeng.anticounterfeitbackend.dto.ValidationRequest;
 import com.apeng.anticounterfeitbackend.entity.Location;
 import com.apeng.anticounterfeitbackend.entity.Product;
@@ -60,6 +61,11 @@ public class ProductController {
     @GetMapping
     public List<ProductResponse> getAll() {
         return productService.getAll().stream().map(ProductResponse::new).toList();
+    }
+
+    @GetMapping("/stats")
+    public ProductionStats getStats() {
+        return productService.stats();
     }
 
     @PutMapping("/{id}")

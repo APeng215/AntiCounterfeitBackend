@@ -1,6 +1,7 @@
 package com.apeng.anticounterfeitbackend.service;
 
 
+import com.apeng.anticounterfeitbackend.dto.ProductionStats;
 import com.apeng.anticounterfeitbackend.dto.ProductRequest;
 import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.entity.QueryInfo;
@@ -19,4 +20,5 @@ public interface ProductService {
     Product bindColors(Long id, List<Color> colors);
     Product validate(UUID uuid, String signature, QueryInfo queryInfo);
     void deleteAll(List<Long> ids);
+    ProductionStats stats();
 }
