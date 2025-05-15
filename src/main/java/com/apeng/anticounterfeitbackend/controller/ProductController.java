@@ -39,7 +39,12 @@ public class ProductController {
     @PostMapping
     public List<Product> add(@RequestBody ProductRequest productRequest) {
         validateEmpty(productRequest);
+        plusDays(productRequest);
         return productService.add(productRequest);
+    }
+
+    private static void plusDays(ProductRequest productRequest) {
+        productRequest.setProduceDate(productRequest.getProduceDate().plusDays(1));
     }
 
     private static void validateEmpty(ProductRequest productRequest) {
