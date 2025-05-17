@@ -45,6 +45,10 @@ public class Location {
     public static Location ofJsonObject(JSONObject responseObject) {
         Location result = new Location();
         result.populate(responseObject);
+        if (result.lat == null) {
+            result.lat = 34.7599;
+            result.lng = 113.6459;
+        }
         return result;
     }
 
