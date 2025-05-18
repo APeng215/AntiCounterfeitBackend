@@ -17,7 +17,7 @@ public class AcColorController {
 
     @PostMapping
     public Color add(@RequestBody String colorInHex) {
-        return acColorService.add(Color.getColor(colorInHex));
+        return acColorService.add(Color.decode(colorInHex));
     }
 
     @GetMapping
@@ -25,9 +25,11 @@ public class AcColorController {
         return acColorService.getAll();
     }
 
-    @DeleteMapping("/{colorInHex}")
-    public boolean delete(@PathVariable String colorInHex) {
-        return acColorService.delete(Color.getColor(colorInHex));
+    @DeleteMapping()
+    public boolean delete(@RequestBody String colorInHex) {
+        System.out.println(colorInHex);
+        System.out.println(Color.decode(colorInHex));
+        return acColorService.delete(Color.decode(colorInHex));
     }
 
 }
