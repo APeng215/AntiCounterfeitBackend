@@ -9,6 +9,7 @@ import com.apeng.anticounterfeitbackend.dto.ValidationRequest;
 import com.apeng.anticounterfeitbackend.entity.Location;
 import com.apeng.anticounterfeitbackend.entity.Product;
 import com.apeng.anticounterfeitbackend.entity.QueryInfo;
+import com.apeng.anticounterfeitbackend.service.IPQueryTimeService;
 import com.apeng.anticounterfeitbackend.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -35,6 +38,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private IPQueryTimeService ipQueryTimeService;
 
     @PostMapping
     public List<Product> add(@RequestBody ProductRequest productRequest) {
@@ -86,9 +92,18 @@ public class ProductController {
 
     @PostMapping("/validate")
     public ProductResponse validate(@RequestBody ValidationRequest validationRequest, HttpServletRequest request) {
-        QueryInfo queryInfo = queryIpAddress(extractClientIp(request));
+        String ip = extractClientIp(request);
+        validationCoolDown(ip);
+        ipQueryTimeService.updateQueryTime(ip);
+        QueryInfo queryInfo = queryIpAddress(ip);
         System.out.println(queryInfo);
         return new ProductResponse(productService.validate(validationRequest.getUuid(), validationRequest.getSignature(), queryInfo));
+    }
+
+    private void validationCoolDown(String ip) {
+        if (ipQueryTimeService.isIPinCd(ip)) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+        }
     }
 
     private static List<Color> convert2ColorObjects(List<String> colorsInHex) {
@@ -148,11 +163,11 @@ public class ProductController {
                 .addHeader("Authorization", "APPCODE " + APP_CODE)
                 .build();
 
-        return requestAndParse(client, request, ip);
+        return requestAPI(client, request, ip);
     }
 
     @NotNull
-    private static QueryInfo requestAndParse(OkHttpClient client, Request request, String ip) {
+    private static QueryInfo requestAPI(OkHttpClient client, Request request, String ip) {
         System.out.println("Address query request: " + request.toString());
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {

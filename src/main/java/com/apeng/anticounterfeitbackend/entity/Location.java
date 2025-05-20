@@ -46,10 +46,14 @@ public class Location {
         Location result = new Location();
         result.populate(responseObject);
         if (result.lat == null) {
-            result.lat = 34.7599;
-            result.lng = 113.6459;
+            populateDefault(result);
         }
         return result;
+    }
+
+    private static void populateDefault(Location result) {
+        result.lat = 34.7599; // Zhengzhou City
+        result.lng = 113.6459;
     }
 
 }
